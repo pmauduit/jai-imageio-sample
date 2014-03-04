@@ -1,5 +1,5 @@
 compile:
-	javac -classpath /usr/share/java/jai_core.jar:/usr/share/java/jai_codec.jar JAISampleProgram.java
+	javac -classpath '/usr/share/java/*' JAISampleProgram.java
 run: compile
-	strace java -cp /usr/share/java/jai_core.jar:/usr/share/java/jai_codec.jar:. JAISampleProgram main file.png 2>&1
+	strace java -cp '/usr/share/java/*:.' JAISampleProgram main file.png 2>&1
 	
