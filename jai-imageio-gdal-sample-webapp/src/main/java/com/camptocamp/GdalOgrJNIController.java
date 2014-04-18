@@ -100,8 +100,11 @@ public class GdalOgrJNIController {
 				log.info(e.getMessage());
 			}
 			info.put("libturbojpeg",
-					new JSONObject().put("available", tJpegEnabled));
-		} finally {
+					new JSONObject().put("status", tJpegEnabled ? "available" : "unavailable"));
+		} catch (Throwable e) {
+			info.put("exception", e.getMessage());
+		} 
+		finally {
 			ret.write(info.toString(2));
 			if (ret != null)
 				ret.close();
