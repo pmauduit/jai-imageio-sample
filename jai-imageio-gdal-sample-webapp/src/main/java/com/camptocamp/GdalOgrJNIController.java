@@ -89,7 +89,7 @@ public class GdalOgrJNIController {
 			info.put("geotools", getGDALOGRStatus());
 			// JAI
 			info.put("jai-imageio",
-					new JSONObject().put("available", Image.isAvailable()));
+					new JSONObject().put("status", Image.isAvailable() ? "available" : "unavailable" ));
 
 			// TurboJPEG
 			Boolean tJpegEnabled = false;
@@ -102,7 +102,7 @@ public class GdalOgrJNIController {
 			info.put("libturbojpeg",
 					new JSONObject().put("available", tJpegEnabled));
 		} finally {
-			ret.write(info.toString(4));
+			ret.write(info.toString(2));
 			if (ret != null)
 				ret.close();
 		}
