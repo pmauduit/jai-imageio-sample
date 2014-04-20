@@ -5,10 +5,12 @@ import it.geosolutions.imageio.gdalframework.GDALUtilities;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.ogr.OGRDataStoreFactory;
@@ -18,15 +20,31 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.apache.log4j.Logger;
 
 import com.sun.medialib.mlib.Image;
+
 
 @Controller
 @RequestMapping("/info.json")
 public class GdalOgrJNIController {
+
+	
 	static Logger log = Logger.getLogger(GdalOgrJNIController.class.getName());
 
+	static boolean turboJpegEnabled = false;
+	
+	static boolean isTurboJpegEnabled() {
+		try {
+  			System.loadLibrary("turbojpeg");
+			turboJpegEnabled = true;
+		} catch (Throwable e) {
+ 			log.info("[error] Loading turboJPEG: " + e.getMessage());
+		}
+
+		return turboJpegEnabled;
+		
+	}
+	
 	protected JSONObject getGDALOGRStatus() {
 		JSONObject r = new JSONObject();
 
@@ -66,7 +84,7 @@ public class GdalOgrJNIController {
 							e.toString()));
 		}
 
-		// GDAL
+		// GDAL		
 		if (GDALUtilities.isGDALAvailable()) {
 			r.put("GDAL", new JSONObject().put("status", "available"));
 		} else {
@@ -84,7 +102,7 @@ public class GdalOgrJNIController {
 		JSONObject info = new JSONObject();
 		try {
 			ret = resp.getWriter();
-
+			
 			// Add GeoTools informations
 			info.put("geotools", getGDALOGRStatus());
 			// JAI
@@ -92,15 +110,10 @@ public class GdalOgrJNIController {
 					new JSONObject().put("status", Image.isAvailable() ? "available" : "unavailable" ));
 
 			// TurboJPEG
-			Boolean tJpegEnabled = false;
-			try {
-				System.loadLibrary("turbojpeg");
-				tJpegEnabled = true;
-			} catch (Throwable e) {
-				log.info(e.getMessage());
-			}
 			info.put("libturbojpeg",
-					new JSONObject().put("status", tJpegEnabled ? "available" : "unavailable"));
+					new JSONObject().put("status", GdalOgrJNIController.isTurboJpegEnabled() ? "available" : "unavailable"));
+
+		
 		} catch (Throwable e) {
 			info.put("exception", e.getMessage());
 		} 

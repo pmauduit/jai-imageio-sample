@@ -6,5 +6,5 @@
        http://www.springframework.org/schema/web-services http://www.springframework.org/schema/web-services/web-services-2.0.xsd">
 
 	<bean class="com.camptocamp.GdalOgrJNIController" />
-
+	<bean class="com.camptocamp.NativeLibAvailableController" />
 </beans>
