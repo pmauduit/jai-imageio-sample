@@ -6,7 +6,7 @@ import javax.media.jai.widget.ScrollingImagePanel;
 import com.sun.media.jai.codec.FileSeekableStream;
 import java.awt.image.renderable.ParameterBlock;
 import java.awt.*;
-
+import com.sun.medialib.mlib.Image;
 
 public class JAISampleProgram 
 {
@@ -23,6 +23,11 @@ public class JAISampleProgram
 		{
 			System.out.println("Error opening the image");
 			System.exit(0);
+		}
+		if (Image.isAvailable()) {
+			System.out.println("ImageIO native impl. seems to be available");
+		} else {
+			System.out.println("ImageIO native impl. does NOT seem to be available");			
 		}
 		/** 
 		 * Create an operator to decode the image file
