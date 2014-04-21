@@ -1,14 +1,18 @@
+package com.camptocamp.jnistandalone;
+
 import java.io.IOException;
 
 import javax.media.jai.*;
 import javax.media.jai.widget.ScrollingImagePanel;
 
 import com.sun.media.jai.codec.FileSeekableStream;
+
 import java.awt.image.renderable.ParameterBlock;
 import java.awt.*;
+
 import com.sun.medialib.mlib.Image;
 
-public class JAISampleProgram 
+public class Standalone 
 {
 	public static void main(String args[])
 	{
@@ -16,8 +20,8 @@ public class JAISampleProgram
 		try
 		{
 			/*create a stream on the input file specified.*/
-			System.out.println(args[1]);
-			fi = new FileSeekableStream(args[1]);
+			System.out.println("file.png");
+			fi = new FileSeekableStream("file.png");
 		}
 		catch(IOException ex)
 		{
@@ -51,15 +55,20 @@ public class JAISampleProgram
 
 		//rest of the code is AWT window to display the image we created.
 
-		int width = image2.getWidth();
-		int height = image2.getHeight();
+		int width = image2.getWidth() + 20;
+		int height = image2.getHeight() + 20;
 
 		ScrollingImagePanel panel=new ScrollingImagePanel(image2,width,height);
 		Frame window=new Frame("JAI Sample Program");
 		window.add(panel);
 		window.pack();
-		window.show(); 
-
+		window.show();
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		window.dispose();
 	}
 
 }
