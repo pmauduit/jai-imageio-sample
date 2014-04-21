@@ -1,6 +1,7 @@
 package com.camptocamp.jnistandalone;
 
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.media.jai.*;
 import javax.media.jai.widget.ScrollingImagePanel;
@@ -69,6 +70,38 @@ public class Standalone
 			e.printStackTrace();
 		}
 		window.dispose();
+		 try {
+			 System.out.println("Loaded native libraries before ending:");
+			String[] lib = ClassScope.getLoadedLibraries(ClassLoader.getSystemClassLoader());
+			for (String l: lib) {
+				System.out.println("\t" + l);
+			}
+		 } catch (Exception e) {}
+		 
+		
+	}
+	static class ClassScope {
+		private static java.lang.reflect.Field LIBRARIES = null;
+		static {
+			try {
+				LIBRARIES = ClassLoader.class
+						.getDeclaredField("loadedLibraryNames");
+				LIBRARIES.setAccessible(true);
+			} catch (NoSuchFieldException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		public static String[] getLoadedLibraries(final ClassLoader loader)
+				throws Exception {
+			final Vector<String> libraries = (Vector<String>) LIBRARIES
+					.get(loader);
+			return libraries.toArray(new String[] {});
+		}
 	}
 
 }
