@@ -1,5 +1,12 @@
 jai-imageio-sample
 ==================
 
-A simple program stolen from the internet to test native JAI imageIO setup, and a webapp which returns the status of Java native libs and some other stuff available on your system.
+These both directories address the same goal: to provide some debug
+informations on how are installed GDAL/OGR native java bindings, if the
+requirements are fullfilled ...
+
+- jai-imageio-gdal-sample-standalone: a simple standalone java program ;
+
+- jai-imageio-gdal-sample-webapp: a simple webapp meant to be deployed in a web
+  servlet engine (tomcat)
 
