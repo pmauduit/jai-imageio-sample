@@ -48,6 +48,7 @@ public class NativeLibAvailableController {
 		Writer ret = resp.getWriter();
 		try {
 
+			// native libs
 			String [] libraries = ClassScope.getLoadedLibraries(ClassLoader
 					.getSystemClassLoader());
 			JSONArray libr = new JSONArray();
@@ -56,10 +57,17 @@ public class NativeLibAvailableController {
 			}
 			info.put("loaded_native_libraries", libr);
 			
+			// current available packages
+			JSONArray packs = new JSONArray();
+			for (Package p : Package.getPackages()) {
+				packs.put(p.getName());
+			}
+			info.put("known_packages", packs);
+
 		} catch (Exception e) {
 			info.put("exception", e.getMessage());
 		} finally {
-			ret.write(info.toString(2));
+			ret.write(info.toString(4));
 			if (ret != null)
 				ret.close();
 		}
