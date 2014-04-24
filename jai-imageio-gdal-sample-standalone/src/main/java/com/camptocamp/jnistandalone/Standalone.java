@@ -1,24 +1,22 @@
 package com.camptocamp.jnistandalone;
 
-import it.geosolutions.imageio.gdalframework.GDALUtilities;
-
+import java.awt.Frame;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.media.jai.*;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
 import javax.media.jai.widget.ScrollingImagePanel;
 
+import org.gdal.gdal.gdal;
+import org.gdal.ogr.ogr;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
-import org.geotools.data.ogr.OGRDataStoreFactory;
-import org.geotools.data.ogr.jni.JniOGRDataStoreFactory;
 
 import com.sun.media.jai.codec.FileSeekableStream;
-
-import java.awt.image.renderable.ParameterBlock;
-import java.awt.*;
-
 import com.sun.medialib.mlib.Image;
 
 public class Standalone {
@@ -35,36 +33,24 @@ public class Standalone {
 
 		// OGR
 		try {
-			Class.forName("org.gdal.ogr.ogr");
-
-			OGRDataStoreFactory f = new JniOGRDataStoreFactory();
-
-			if (f.isAvailable()) {
-				System.out
-						.println("JNI OGR datastorefactory available. Listing drivers:");
-				for (String s : f.getAvailableDrivers()) {
-					System.out.println("\t" + s);
-				}
+			ogr.RegisterAll();
+			// If nothing caught from here, OGR should be available
+			System.out.println("OGR seems available. Listing drivers:");
+			for (int i = 0 ; i < ogr.GetDriverCount() ; i++) {
+				System.out.println("\t" + ogr.GetDriver(i).getName());
 			}
-			// Unavailable
-			else {
-				System.out
-						.println("JNI OGR datastorefactory reported UNAVAILABLE");
-			}
-			// Exception raised
-		} catch (Throwable e) {
-			System.out.println("JNI OGR datastorefactory UNAVAILABLE, reason: "
-					+ e.getMessage());
 		}
-
+		// Exception raised
+		catch (Throwable e) {
+		System.out.println("OGR unavailable, reason: "
+				+ e.getMessage());
+		}		
 		// GDAL
 		try {
-			if (GDALUtilities.isGDALAvailable()) {
-				System.out
-						.println("GDAL utilities are reported GDAL as available.");
-			} else {
-				System.out
-						.println("GDAL utilities reported GDAL as UNAVAILABLE.");
+			gdal.AllRegister();
+			System.out.println("GDAL seems available. Listing drivers: ");
+			for (int i = 0 ; i < gdal.GetDriverCount(); i++) {
+				System.out.println("\t" + gdal.GetDriver(i).getShortName());				
 			}
 		} catch (Throwable e) {
 			System.out

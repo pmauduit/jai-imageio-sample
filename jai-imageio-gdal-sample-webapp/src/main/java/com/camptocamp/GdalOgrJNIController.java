@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.gdal.gdal.gdal;
+import org.gdal.ogr.ogr;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.ogr.OGRDataStoreFactory;
@@ -20,16 +22,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.sun.corba.se.impl.copyobject.JavaStreamObjectCopierImpl;
 import com.sun.medialib.mlib.Image;
-
 
 @Controller
 @RequestMapping("/info.json")
 public class GdalOgrJNIController {
 
-	
 	static Logger log = Logger.getLogger(GdalOgrJNIController.class.getName());
-	
+
 	protected JSONObject getGDALOGRStatus() {
 		JSONObject r = new JSONObject();
 
@@ -40,63 +41,62 @@ public class GdalOgrJNIController {
 			DataStoreFactorySpi dsfspi = dtf.next();
 			gtDatastores.put(dsfspi.getDisplayName());
 		}
-		r.put("datastores", gtDatastores);
+		r.put("GeoTools", new JSONObject().put("datastores", gtDatastores));
+		
 		// OGR
+		JSONObject ogrStatus = new JSONObject();
 		try {
-			Class.forName("org.gdal.ogr.ogr");
-
-			OGRDataStoreFactory f = new JniOGRDataStoreFactory();
-
-			// Next step will call loadLibrary("gdaljni") ... Not good.
-			// This will arise in GeoTools library.
-
-			if (f.isAvailable()) {
-				JSONArray availableOGRDrivers = new JSONArray();
-
-				for (String s : f.getAvailableDrivers()) {
-					availableOGRDrivers.put(s);
-				}
-				r.put("OGR",
-						new JSONObject().put("status", "available").put(
-								"drivers", availableOGRDrivers));
-
+			// should make a native call
+			ogr.RegisterAll();
+			JSONArray availableOGRDrivers = new JSONArray();
+			for (int i = 0; i < ogr.GetDriverCount(); i++) {
+				availableOGRDrivers.put(ogr.GetDriver(i).getName());
 			}
-			// Unavailable
-			else {
-				r.put("OGR",
-						new JSONObject().put("status", "unavailable").put(
-								"reason", "JniOGR reported as unavailable (JniOGRDataStoreFactory.doIsAvailable() throwed "
-										+ "something or returned false, presumably native library not found in the java.library.path "
-										+ "or attempted to be loaded twice."));
-			}
-			// Exception raised
-		} catch (ClassNotFoundException e){
-			r.put("OGR",
-					new JSONObject().put("status", "unavailable").put(
-							"reason", "Unable to resolve class org.gdal.ogr.ogr. Probable misconfiguration of the classpath."));			
+			ogrStatus.put("status", "available").put("drivers", availableOGRDrivers);
 		} catch (Throwable e) {
-			r.put("OGR",
-					new JSONObject().put("status", "unavailable").put("reason",
-							e.toString()));
+			ogrStatus.put("status", "unavailable").put("reason", e.toString());
 		}
+		
+		// now try via GeoTools classes
+		try {
+			OGRDataStoreFactory f = new JniOGRDataStoreFactory();
+			if (f.isAvailable()) {
+				ogrStatus.put("via-geotools", "available");
+			} else {
+				ogrStatus.put("via-geotools", "available");
+			}
+		} catch (Throwable e) {
+			ogrStatus.put("via-geotools", new JSONObject().
+					put("status", "unavailable").
+					put("reason", e.getMessage()));
+		}	
+		r.put("OGR", ogrStatus);
 
 		// GDAL
+		JSONObject gdalStatus = new JSONObject();
 		try {
-			// Same remark: Call to loadLibrary("gdaljni") initiated 
-			// by imageIO-Ext library ("vanilla" version, my fork on github
-			// avoids this).
-			if (GDALUtilities.isGDALAvailable()) {
-				r.put("GDAL", new JSONObject().put("status", "available"));
-			} else {
-				r.put("GDAL", new JSONObject().put("status", "unavailable"));
+			// should make a native call
+			gdal.AllRegister();
+			JSONArray availableGDALDrivers = new JSONArray();
+			for (int i = 0 ; i < gdal.GetDriverCount(); i++) {
+				availableGDALDrivers.put(gdal.GetDriver(i).getShortName());
 			}
-		} catch (NoClassDefFoundError e) {
-			r.put("GDAL", new JSONObject().put("status", "unavailable")
-					.put("reason", "Unable to find class org.gdal.gdal.gdal, this is likely due to "
-							+ "a classpath misconfiguration."));
-			
+			gdalStatus.put("status", "available").put("drivers", availableGDALDrivers);
+		} catch (Throwable e) {
+			gdalStatus.put("status", "unavailable").put("reason", e.toString());
 		}
-
+		// via GeoTools
+		try {
+		 if (GDALUtilities.isGDALAvailable()) {
+			 gdalStatus.put("via-geotools", new JSONObject().put("status", "available"));
+		 } else {
+			 gdalStatus.put("via-geotools", new JSONObject().put("status", "unavailable"));
+		 }
+		} catch (Throwable e) {
+			 gdalStatus.put("via-geotools", new JSONObject().put("status", "unavailable")
+					 .put("reason", e.getMessage()));
+		}
+		r.put("GDAL", gdalStatus);
 		return r;
 	}
 
@@ -108,20 +108,22 @@ public class GdalOgrJNIController {
 		JSONObject info = new JSONObject();
 		try {
 			ret = resp.getWriter();
-			
+
 			// Add GeoTools informations
 			info.put("geotools", getGDALOGRStatus());
 			// JAI
 			try {
-			info.put("jai-imageio",
-					new JSONObject().put("status", Image.isAvailable() ? "available" : "unavailable" ));
+				info.put("jai-imageio", new JSONObject().put("status",
+						Image.isAvailable() ? "available" : "unavailable"));
 
 			} catch (NoClassDefFoundError e) {
-				info.put("jai-imageio",
-						new JSONObject().put("status", "unavailable" ).put("reason",
+				info.put(
+						"jai-imageio",
+						new JSONObject().put("status", "unavailable").put(
+								"reason",
 								"Unable to find class com.sun.medialib.mlib.Image, this is likely due to "
 										+ "a classpath misconfiguration."));
-				
+
 			}
 			// TurboJPEG
 			try {
@@ -129,29 +131,39 @@ public class GdalOgrJNIController {
 						.forName("org.libjpegturbo.turbojpeg.TJCompressor");
 				c.newInstance();
 			} catch (NoClassDefFoundError e) {
-				info.put("libturbojpeg",
-						new JSONObject().put("status", "unavailable").put("reason", 
-								"Unable to find class org.libjpegturbo.turbojpeg.TJCompressor, this is likely due to "
-										+ "a classpath misconfiguration."));
+				info.put(
+						"libturbojpeg",
+						new JSONObject()
+								.put("status", "unavailable")
+								.put("reason",
+										"Unable to find class org.libjpegturbo.turbojpeg.TJCompressor, this is likely due to "
+												+ "a classpath misconfiguration."));
 			} catch (ClassNotFoundException e) {
-				info.put("libturbojpeg",
-				new JSONObject().put("status", "unavailable").put("reason", 
-						"Unable to find class org.libjpegturbo.turbojpeg.TJCompressor, this is likely due to "
-								+ "a classpath misconfiguration."));				
+				info.put(
+						"libturbojpeg",
+						new JSONObject()
+								.put("status", "unavailable")
+								.put("reason",
+										"Unable to find class org.libjpegturbo.turbojpeg.TJCompressor, this is likely due to "
+												+ "a classpath misconfiguration."));
 			} catch (UnsatisfiedLinkError e) {
-				info.put("libturbojpeg",
-				new JSONObject().put("status", "unavailable").put("reason", 
-						"Class found but references unreachable native code. Probably a mismatch between "
-						+ "bindings and native library version."));					
+				info.put(
+						"libturbojpeg",
+						new JSONObject()
+								.put("status", "unavailable")
+								.put("reason",
+										"Class found but references unreachable native code. Probably a mismatch between "
+												+ "bindings and native library version."));
 			} catch (Throwable e) {
-				info.put("libturbojpeg",
-						new JSONObject().put("status", "unavailable").put("reason", e.getMessage()));
+				info.put(
+						"libturbojpeg",
+						new JSONObject().put("status", "unavailable").put(
+								"reason", e.getMessage()));
 			}
 
 		} catch (Throwable e) {
 			info.put("unhandled_exception", e.getMessage());
-		} 
-		finally {
+		} finally {
 			ret.write(info.toString(2));
 			if (ret != null)
 				ret.close();
