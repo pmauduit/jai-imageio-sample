@@ -7,4 +7,5 @@
 
 	<bean class="com.camptocamp.GdalOgrJNIController" />
 	<bean class="com.camptocamp.NativeLibAvailableController" />
+		<bean class="com.camptocamp.IdentityController" />
 </beans>
