@@ -10,7 +10,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <name>gdalogr imageio info webapp</name>
   <url>http://www.springframework.org/spring-ws</url>
   <properties>
-    <gt.version>9.2</gt.version>
+    <gt.version>12-remloadlibrary</gt.version>
   </properties>
   <build>
     <finalName>jni-info</finalName>
@@ -87,17 +87,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
           <groupId>javax.media</groupId>
           <artifactId>jai_core</artifactId>
         </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.geotools</groupId>
-      <artifactId>gt-mif</artifactId>
-      <version>${gt.version}</version>
-          <exclusions>
-        <exclusion>
-          <groupId>javax.media</groupId>
-          <artifactId>jai_core</artifactId>
-        </exclusion> 
       </exclusions>
     </dependency>
     <dependency>
@@ -253,7 +242,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         </exclusion>        
       </exclusions>
     </dependency>
-    <!-- debian packages might be outside of maven reach. Forcing it ... -->
+    <!-- debian packages might be outside of maven reach. Forcing dependencies resolution ... -->
     <dependency>
   		<groupId>com.sun.medialib</groupId>
   		<artifactId>mlib</artifactId>
@@ -282,6 +271,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     </dependency>
   </dependencies>
   <repositories>
+    <repository>
+      <id>local</id>
+      <url>file:///home/pmauduit/.m2/repository</url>
+    </repository>
     <repository>
       <id>maven2-repository.dev.java.net</id>
       <name>Java.net repository</name>
