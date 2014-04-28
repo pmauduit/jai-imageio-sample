@@ -1,5 +1,7 @@
 package com.camptocamp.jnistandalone;
 
+import it.geosolutions.imageio.gdalframework.GDALUtilities;
+
 import java.awt.Frame;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.IOException;
@@ -15,6 +17,9 @@ import org.gdal.gdal.gdal;
 import org.gdal.ogr.ogr;
 import org.geotools.data.DataStoreFactorySpi;
 import org.geotools.data.DataStoreFinder;
+import org.geotools.data.ogr.OGRDataStoreFactory;
+import org.geotools.data.ogr.jni.JniOGRDataStoreFactory;
+
 
 import com.sun.media.jai.codec.FileSeekableStream;
 import com.sun.medialib.mlib.Image;
@@ -39,6 +44,12 @@ public class Standalone {
 			for (int i = 0 ; i < ogr.GetDriverCount() ; i++) {
 				System.out.println("\t" + ogr.GetDriver(i).getName());
 			}
+			OGRDataStoreFactory f = new JniOGRDataStoreFactory();
+			if (f.isAvailable()) {
+				System.out.println("[OGR] via-geotools available");
+			} else {
+				System.out.println("[OGR] via-geotools UNAVAIBLE");
+			}
 		}
 		// Exception raised
 		catch (Throwable e) {
@@ -52,6 +63,11 @@ public class Standalone {
 			for (int i = 0 ; i < gdal.GetDriverCount(); i++) {
 				System.out.println("\t" + gdal.GetDriver(i).getShortName());				
 			}
+			 if (GDALUtilities.isGDALAvailable()) {
+				 System.out.println("[GDAL] Via geotools available");
+			 } else {
+				 System.out.println("[GDAL] Via geotools UNAVAILABLE");
+			 }
 		} catch (Throwable e) {
 			System.out
 					.println("GDAL utilities reported GDAL as UNAVAILABLE, reason "

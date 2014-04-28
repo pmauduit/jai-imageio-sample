@@ -63,7 +63,7 @@ public class GdalOgrJNIController {
 			if (f.isAvailable()) {
 				ogrStatus.put("via-geotools", "available");
 			} else {
-				ogrStatus.put("via-geotools", "available");
+				ogrStatus.put("via-geotools", "unavailable");
 			}
 		} catch (Throwable e) {
 			ogrStatus.put("via-geotools", new JSONObject().
