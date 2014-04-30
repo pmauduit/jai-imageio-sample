@@ -3,7 +3,8 @@ jai-imageio-sample
 
 These both directories address the same goal: to provide some debug
 informations on how are installed GDAL/OGR native java bindings, if the
-requirements are fullfilled ...
+requirements are fullfilled, and to compare results between using GDAL 
+bindings directly or via GeoTools
 
 - jai-imageio-gdal-sample-standalone: a simple standalone java program ;
 
