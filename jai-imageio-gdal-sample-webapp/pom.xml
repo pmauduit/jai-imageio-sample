@@ -10,7 +10,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <name>gdalogr imageio info webapp</name>
   <url>http://www.springframework.org/spring-ws</url>
   <properties>
-    <gt.version>12-remloadlibrary</gt.version>
+    <gt.version>9.2</gt.version>
   </properties>
   <build>
     <finalName>jni-info</finalName>
