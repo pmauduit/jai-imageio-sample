@@ -48,6 +48,11 @@ public class NativeLibAvailableController {
 		Writer ret = resp.getWriter();
 		try {
 
+			// info on java.library.path
+			String javaLibPath = System.getProperty("java.library.path");
+			info.put("java_library_path", javaLibPath);
+			
+			
 			// native libs
 			String [] libraries = ClassScope.getLoadedLibraries(ClassLoader
 					.getSystemClassLoader());
@@ -55,6 +60,7 @@ public class NativeLibAvailableController {
 			for (String lib : libraries) {
 				libr.put(lib);
 			}
+			
 			info.put("loaded_native_libraries", libr);
 			
 			// current available packages
