@@ -260,7 +260,7 @@
       <artifactId>gdal</artifactId>
       <version>1.0.0</version>
       <scope>system</scope>
-      <systemPath>/usr/share/java/gdal.jar</systemPath>
+      <systemPath>${env.GDAL_JAR}</systemPath>
     </dependency>
     <!-- geotools - handles ESPG -->
     <dependency>
